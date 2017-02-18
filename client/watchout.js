@@ -3,36 +3,72 @@
 //Find a way to instantiate an asteroid (Enter / Select All / Update)
 var testData = new Array(15);
 
-d3.select('svg')
-  .append('circle')
-    .attr('cx', 480)
-    .attr('cy', 250)
-    .attr('r', 15)
-    .style('fill', 'red')
-    .on('mousemove');
+var drag = d3.behavior.drag()
+             .on('dragstart', function() { circle.style('fill', 'red'); })
+             .on('drag', function() {
+               circle.attr('cx', d3.event.x).attr('cy', d3.event.y);
+             })
+             .on('dragend', function() {
+               circle.style('fill', 'red');
+             });
 
+var circle = d3.select('svg').selectAll('.draggable')
+                .data([{ x: 480, y: 250, r: 15 }])
+                .enter()
+                .append('svg:circle')
+                .attr('class', 'draggable')
+                .attr('cx', function(d) { return d.x; })
+                .attr('cy', function(d) { return d.y; })
+                .attr('r', function(d) { return d.r; })
+                .call(drag)
+                .style('fill', 'red');
 
 var update = function (data) {
   var randx = function() { return Math.random() * 960;};
   var randy = function() { return Math.random() * 500;};
 
-  d3.select('svg').selectAll('circle')
+  d3.select('svg').selectAll('.asteroid')
     .data(data)
-    .enter().append('circle')
-      .attr('cx', randx)
-      .attr('cy', randy)
-      .attr('r', 15);
+    .enter().append('svg:image')
+    .attr("xlink:href","asteroid.png")
+    .attr('x', randx)
+    .attr('y', randy)
+    .attr('width', 50)
+    .attr('height', 50)
+    .attr('class', 'asteroid');
 
-  d3.select('svg').selectAll('circle')
+  d3.select('svg').selectAll('.asteroid')
     .data(data)
     .transition()
     .duration(1000)
-    .attr('cx', randx)
-      .attr('cy', randy)
-      .attr('r', 15);
+    .attr("xlink:href","asteroid.png")
+    .attr('x', randx)
+    .attr('y', randy)
+    .attr('width', 50)
+    .attr('height', 50);
 };
 
 setInterval(update.bind(null, testData), 1000);
+
+var distance = function(p0, p1) {
+  var dx = p1.x - p0.x;
+  var dy = p1.y - p0.y;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+var distanceXY = function(x0, y0, x1, y1) {
+  var dx = x1 - x0;
+  var dy = y1 - y0;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
+var circleCollision = function(c0, c1) {
+  return distance(c0, c1) <= c0.radius + c1.radius;
+};
+
+
+
+
 
 // var alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 //
